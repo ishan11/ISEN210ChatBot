@@ -21,8 +21,6 @@ def lambda_handler(event, context):
     time.tzset()
     logger.debug('event.bot.name={}'.format(event['bot']['name']))
 
-   
-
     return dispatch(event)
 
 
@@ -37,12 +35,17 @@ def dispatch(intent_request):
     logger.debug('dispatch userId={}, intentName={}'.format(
         intent_request['userId'], intent_request['currentIntent']['name']))
 
+    ##Parsing the incoming JSON to gather key information
     intent_name = intent_request['currentIntent']['name']
+    slots = intent_request['currentIntent']['slots']    
 
     # Dispatch to your bot's intent handlers
     if intent_name == 'Minors':
         return minors()
-
+    elif intent_name == 'GPA':
+        return GPA()
+    elif intent_name == 'Prerequisite':
+        return preReqCheck(slots)
 
     raise Exception('Intent with name ' + intent_name + ' not supported')
 
@@ -53,15 +56,38 @@ def minors():
         session_attributes,
         'Fulfilled',
         {
-            'contentType' : 'PlainText',
-            'content': "HERE is a list of university approved minors. (http://registrar.tamu.edu/Registrar/media/REGI_SpecPDFDocs/UniversityApprovedMinors.pdf)"
+            'contentType': 'PlainText',
+            'content': "Here is a list of university approved minors. (http://registrar.tamu.edu/Registrar/media/REGI_SpecPDFDocs/UniversityApprovedMinors.pdf)"
         }
     )
 
 
+def GPA():
+    session_attributes = {}
+    return close(
+        session_attributes,
+        'Fulfilled',
+        {
+            'contentType': 'PlainText',
+            'content': "Go to the Howdy Portal"
+        }
+    )
 
+def preReqCheck(slots):
+    course = slots['course']
+    prereqs = ''
+    if course == 'ISEN210' or course == 'isen210':
+        prereqs = 'ENGR112'
 
-
+    session_attributes = {}
+    return close(
+        session_attributes,
+        'Fulfilled',
+        {
+            'contentType': 'PlainText',
+            'content': "The prequisites for the course are: " + prereqs
+        }
+    )
 
 
 
